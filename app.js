@@ -1,3 +1,4 @@
+
 // module pattern: it returns an object containing all of the functions that we want to be public. So the functions that we want to give the outside scope access to.
 // we've wrapped the entire function in IIFE for privacy
 var budgetController = (function() {
