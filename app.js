@@ -94,8 +94,8 @@ var UIController = (function() {
       };
     },
 
-    addListItem: function(obj, type) {
-      var = html;
+    addListItem: function(obj, type) { // obj is the instance
+      var = html, newHtml;
 
       // create HTML string with placeholder text
       // we put in some % signs so it's easier to find later
@@ -107,6 +107,10 @@ var UIController = (function() {
 
 
       // replace the placeholder text with some actual data
+      // replace() searches for a string and then replaces that string with the data that we put into the method
+      newHtml = html.replace('%id%', obj.id)
+      newHtml = newHtml.replace('%description%', obj.description);
+      newHtml = newHtml.replace('%value%', obj.value);
 
       // insert the HTML into the DOM
     },
