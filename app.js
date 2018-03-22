@@ -11,13 +11,13 @@ var UIController = (function() {
 
   // it needs to be public function because it needs to be accessible by the other controller
   return {
-    getinput: function() {
+    getInput: function() {
       // to return all 3 variables in a function, return them as properties in an object
       return {
         type: document.querySelector('.add__type').value, // Will be either inc or exp
         description: document.querySelector('.add__description').value,
-        value: document.querySelector('add__value').value;
-      }
+        value: document.querySelector('.add__value').value
+      };
     }
   };
 
@@ -25,11 +25,13 @@ var UIController = (function() {
 
 
 // Global App Controller
-var controller = (function(budgetCtrl, UICrtl) {
+var controller = (function(budgetCtrl, UICtrl) {
 
   var ctrlAddItem = function() {
-    
+
     // 1. get the field input data
+    var input = UICtrl.getInput();
+    console.log(input);
 
     // 2. add the item to the budget controller
 
