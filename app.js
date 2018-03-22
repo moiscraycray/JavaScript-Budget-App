@@ -28,6 +28,7 @@ var UIController = (function() {
 var controller = (function(budgetCtrl, UICrtl) {
 
   var ctrlAddItem = function() {
+    
     // 1. get the field input data
 
     // 2. add the item to the budget controller
