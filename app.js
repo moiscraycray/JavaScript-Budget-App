@@ -19,10 +19,53 @@ var budgetController = (function() {
       exp: [],
       inc: []
     },
-    // total incomes and total expenses
+    // total incomes and total expenses. Displays the total amount of money we have
     totals: {
       exp: 0,
       inc: 0
+    }
+  };
+
+  // making these public so allows other modules to add a new item into our data structure.
+  // returning an object that contains all of our public methods
+  return {
+    addItem: function(type, des, val) {
+      var newItem;
+
+      // [1 2 3 4 5], next ID = 6
+      // [1 2 4 6 8], next ID = 9
+      // last ID + 1
+      // create new ID
+      if (data.allItems[type].length > 0) {
+        ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+      } else {
+        ID = 0;
+      }
+
+
+      // Create new item based on 'inc' or 'exp' type
+      if (type === 'exp') {
+        newItem = new Expense(ID, des, val);
+      } else if (type === 'inc') {
+        newItem = new Income(ID, des, val);
+      }
+
+      /*
+      the variable 'type' contains a string 'inc'/'exp'. Using the bracket notation, data.allItems[type] allows us to use the string stored in 'type' to reference the 'inc'/'exp' properties of the object. So this expression would resolve to one of the following statements:
+      data.allItems['inc']; which is the same as data.allItems.inc using the dot notation
+      OR
+      data.allItems['exp']; which is the same as data.allItems.exp
+      Using data.allItems.type would look for a property with the name 'type' but there is no such property in the 'data' object.
+      */
+      // push new item into our data structure
+      data.allItems[type].push(newItem);
+
+      // return the new instance
+      return newItem;
+
+    },
+    testing: function() {
+      console.log(data);
     }
   }
 
@@ -84,10 +127,13 @@ var controller = (function(budgetCtrl, UICtrl) {
 
   var ctrlAddItem = function() {
 
+    var input, newItem;
+
     // 1. get the field input data
-    var input = UICtrl.getInput();
+    input = UICtrl.getInput();
 
     // 2. add the item to the budget controller
+    newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
     // 3. add the item to the UI
 
