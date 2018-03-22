@@ -29,7 +29,7 @@ var budgetController = (function() {
   // making these public so allows other modules to add a new item into our data structure.
   // returning an object that contains all of our public methods
   return {
-    addItem: function(type, des, val) {
+    addItem: function(type, des, val) { // getInput() handles getting these arguments
       var newItem;
 
       // [1 2 3 4 5], next ID = 6
@@ -41,7 +41,6 @@ var budgetController = (function() {
       } else {
         ID = 0;
       }
-
 
       // Create new item based on 'inc' or 'exp' type
       if (type === 'exp') {
@@ -130,6 +129,7 @@ var controller = (function(budgetCtrl, UICtrl) {
     var input, newItem;
 
     // 1. get the field input data
+    // this will get the type, description, value from user input
     input = UICtrl.getInput();
 
     // 2. add the item to the budget controller
