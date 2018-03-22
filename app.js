@@ -80,7 +80,9 @@ var UIController = (function() {
     inputType: '.add__type',
     inputDescription: '.add__description',
     inputValue: '.add__value',
-    inputBtn: '.add__btn'
+    inputBtn: '.add__btn',
+    incomeContainer: '.income__list',
+    expensesContainer: '.expenses__list'
   };
 
   // it needs to be public function because it needs to be accessible by the other controller
@@ -93,6 +95,39 @@ var UIController = (function() {
         value: document.querySelector(DOMstrings.inputValue).value
       };
     },
+
+    // obj is the instance e.g. {1, 'new car', 24000}. type is income/expense
+    addListItem: function(obj, type) {
+      var html, newHtml, element;
+
+      // create HTML string with placeholder text
+      // we put in some % signs so it's easier to find later
+      if (type === 'inc') {
+        element = DOMstrings.incomeContainer;
+        html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+      } else if (type === 'exp') {
+        element = DOMstrings.expensesContainer;
+        html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+      };
+
+
+      // replace the placeholder text with some actual data
+      // replace() searches for a string and then replaces that string with the data that we put into the method
+      newHtml = html.replace('%id%', obj.id)
+      newHtml = newHtml.replace('%description%', obj.description);
+      newHtml = newHtml.replace('%value%', obj.value);
+
+      // insert the HTML into the DOM
+      /*
+      insertAdjacentHTML(position, text); position is the position relative to the element, and must be one of the following strings:
+      'beforebegin': Before the element itself
+      'afterbegin': Just inside the element, before its first child
+      'beforeend': Just inside the element, after its last child
+      'afterend': After the element itself
+      */
+      document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+    },
+
     // returning DOMstrings here so other functions can access the classnames
     getDOMstrings: function() {
       return DOMstrings;
@@ -136,6 +171,7 @@ var controller = (function(budgetCtrl, UICtrl) {
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
     // 3. add the item to the UI
+    UICtrl.addListItem(newItem, input.type);
 
     // 4. calculate the budget
 
