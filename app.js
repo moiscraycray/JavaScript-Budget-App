@@ -13,6 +13,19 @@ var budgetController = (function() {
     this.value = value;
   };
 
+  var data = {
+    // allItems stores all the instances
+    allItems: {
+      exp: [],
+      inc: []
+    },
+    // total incomes and total expenses
+    totals: {
+      exp: 0,
+      inc: 0
+    }
+  }
+
 })();
 
 
