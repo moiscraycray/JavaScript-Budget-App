@@ -40,13 +40,29 @@ var UIController = (function() {
 // Global App Controller
 var controller = (function(budgetCtrl, UICtrl) {
 
-  var DOM = UICtrl.getDOMstrings();
+  // we can call this function by creating an init() below, and returning init()
+  var setupEventListeners = function() {
+    var DOM = UICtrl.getDOMstrings();
+
+    document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
+
+    // adding keypress listener to the global document
+    // 'event' parameter gets automically passed into our event handler by the browser, we don't need to do anything else like calling it; we just need to specify it in anonymous function
+    document.addEventListener('keypress', function(event) {
+      // console.log(event); // keyCode identifies which key was pressed; keyCodes are unique
+      // older browsers don't support .keyCode so .which is a backup
+      if (event.keyCode === 13 || event.which === 13) {
+        ctrlAddItem();
+      }
+    });
+  }
+
+
 
   var ctrlAddItem = function() {
 
     // 1. get the field input data
     var input = UICtrl.getInput();
-    console.log(input);
 
     // 2. add the item to the budget controller
 
@@ -55,18 +71,17 @@ var controller = (function(budgetCtrl, UICtrl) {
     // 4. calculate the budget
 
     // 5. display the budget on the UI
-  }
+  };
 
-  document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
-
-  // adding keypress listener to the global document
-  // 'event' parameter gets automically passed into our event handler by the browser, we don't need to do anything else like calling it; we just need to specify it in anonymous function
-  document.addEventListener('keypress', function(event) {
-    // console.log(event); // keyCode identifies which key was pressed; keyCodes are unique
-    // older browsers don't support .keyCode so .which is a backup
-    if (event.keyCode === 13 || event.which === 13) {
-      ctrlAddItem();
+  // need to return it so it's a public function/can access it from the outside
+  return {
+    init: function() {
+      console.log('app started.');
+      setupEventListeners();
     }
-  });
+  };
 
 })(budgetController, UIController);
+
+// this starts the code. Init() is the only public function
+controller.init();
