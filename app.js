@@ -92,7 +92,7 @@ var UIController = (function() {
       return {
         type: document.querySelector(DOMstrings.inputType).value, // Will be either inc or exp
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value) // parseFloat converts string to float
       };
     },
 
@@ -178,6 +178,14 @@ var controller = (function(budgetCtrl, UICtrl) {
     });
   }
 
+  var updateBudget = function() {
+
+    // 1. calculate the budget
+
+    // 2. Return the budget
+
+    // 3. display the budget on the UI
+  };
 
 
   var ctrlAddItem = function() {
@@ -188,18 +196,25 @@ var controller = (function(budgetCtrl, UICtrl) {
     // this will get the type, description, value from user input
     input = UICtrl.getInput();
 
-    // 2. add the item to the budget controller
-    newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+    // user input validation. isNaN() if not number, return true. if number, return false.
+    // trim() removes whitespace from both sides of a string
+    input.description = input.description.trim();
+    if (input.description !== "" && !isNaN(input.value) && input.value > 0) {
 
-    // 3. add the item to the UI
-    UICtrl.addListItem(newItem, input.type);
+      // 2. add the item to the budget controller
+      newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-    // 4. Clear the fields
-    UICtrl.clearFields();
+      // 3. add the item to the UI
+      UICtrl.addListItem(newItem, input.type);
 
-    // 5. calculate the budget
+      // 4. Clear the fields
+      UICtrl.clearFields();
 
-    // 6. display the budget on the UI
+      // 5. Calculate and update budget
+      updateBudget();
+
+    }
+
   };
 
   // need to return it so it's a public function/can access it from the outside
