@@ -81,6 +81,25 @@ var budgetController = (function() {
 
     },
 
+    deleteItem: function(type, id) {
+      var ids, index;
+      // type is income/expense
+      // map() can also have a (callback) function that takes currentValue, index, array
+      // var new_array = arr.map(function callback(currentValue[, index[, array]])
+      ids = data.allItems[type].map(function(currentValue) {
+        return currentValue.id;
+      });
+
+      // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+      index = ids.indexOf(id);
+
+      if (index !== -1) {
+        // splice() method changes the contents of an array by removing existing elements and/or adding new elements.
+        // array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+        data.allItems[type].splice(index, 1); // index is the element we want to delete. 1 is the number of elements we want to delete
+      }
+    },
+
     calculateBudget: function() {
 
       // calculate total income and expenses
@@ -304,16 +323,17 @@ var controller = (function(budgetCtrl, UICtrl) {
     itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
 
     if (itemID) { // coerced to true/false if this exists
-      // inc-1
+      // e.g. inc-0
       splitID = itemID.split('-'); // output: ['inc','0'];
       type = splitID[0]; // output: 'inc'
-      ID = splitID[1]; // output: '0'
+      ID = parseInt(splitID[1]); // output: 0
 
       // 1. delete item from data structure
+      budgetCtrl.deleteItem(type, ID);
 
       // 2. delete the item from the UI
 
-      // 3. update and show the new budget 
+      // 3. update and show the new budget
     }
 
   };
