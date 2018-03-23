@@ -128,6 +128,27 @@ var UIController = (function() {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
+    // clearing input fields after hitting 'enter'
+    clearFields: function() {
+      var fields, fieldsArr;
+
+      // querySelectorAll returns a list instead of array so we need to convert it to array
+      // querySelectorAll returns all the of the selected elements in the document e.g. all <p>
+      fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+
+      // slice() is a method of the Array object. We cannot call slice() directly on a list ('field') so we need to use to call() to trick the slice() into thinking that we gave it an array, so it will return an array
+      fieldsArr = Array.prototype.slice.call(fields);
+
+      // forEarch: Loops over all the elements of the array. We need to pass a callback function to forEach, and then this callback function is applied to each of the elements in the array
+      // This anonymous function can receive up to 3 arguments
+      fieldsArr.forEach(function(currentValue, index, array) {
+        currentValue.value = ""; // loops over array and sets all elements of array to ""
+      });
+
+      // set the focus back on the first element of the array (description input field)
+      fieldsArr[0].focus();
+    },
+
     // returning DOMstrings here so other functions can access the classnames
     getDOMstrings: function() {
       return DOMstrings;
@@ -173,9 +194,12 @@ var controller = (function(budgetCtrl, UICtrl) {
     // 3. add the item to the UI
     UICtrl.addListItem(newItem, input.type);
 
-    // 4. calculate the budget
+    // 4. Clear the fields
+    UICtrl.clearFields();
 
-    // 5. display the budget on the UI
+    // 5. calculate the budget
+
+    // 6. display the budget on the UI
   };
 
   // need to return it so it's a public function/can access it from the outside
