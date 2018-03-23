@@ -134,7 +134,8 @@ var UIController = (function() {
     budgetLabel: '.budget__value',
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
-    percentageLabel: '.budget__expenses--percentage'
+    percentageLabel: '.budget__expenses--percentage',
+    container: '.container'
   };
 
   // it needs to be public function because it needs to be accessible by the other controller
@@ -156,10 +157,10 @@ var UIController = (function() {
       // we put in some % signs so it's easier to find later
       if (type === 'inc') {
         element = DOMstrings.incomeContainer;
-        html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+        html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
       } else if (type === 'exp') {
         element = DOMstrings.expensesContainer;
-        html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+        html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
       };
 
 
@@ -248,6 +249,8 @@ var controller = (function(budgetCtrl, UICtrl) {
         ctrlAddItem();
       }
     });
+
+    document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
   }
 
   var updateBudget = function() {
@@ -291,6 +294,30 @@ var controller = (function(budgetCtrl, UICtrl) {
     }
 
   };
+
+  // need to pass in event object; the callback function of the addEventListener method always have access to this event object, and we can call it whatever we want
+  // we want the event object here because we want to know what the target element is
+  var ctrlDeleteItem = function(event) {
+    var itemID, splitID, type, ID;
+
+    // the .id is the id from the html
+    itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+    if (itemID) { // coerced to true/false if this exists
+      // inc-1
+      splitID = itemID.split('-'); // output: ['inc','0'];
+      type = splitID[0]; // output: 'inc'
+      ID = splitID[1]; // output: '0'
+
+      // 1. delete item from data structure
+
+      // 2. delete the item from the UI
+
+      // 3. update and show the new budget 
+    }
+
+  };
+
 
   // need to return it so it's a public function/can access it from the outside
   return {
