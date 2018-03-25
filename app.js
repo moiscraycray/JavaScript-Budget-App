@@ -190,6 +190,35 @@ var UIController = (function() {
     expensesPercLabel: '.item__percentage'
   };
 
+  var formatNumber = function(num, type) {
+
+    var numSplit, int, dec;
+    /*
+    + or - before number
+    2 decimals
+    comma separating thousands
+    2345.8493 -> + 2,345.85
+    */
+
+    // .abs() simply removes the sign off the number
+    num = Math.abs(num);
+    num = num.toFixed(2); // puts exactly 2 decimal numbers; this is now a string
+
+    numSplit = num.split('.');
+    int = numSplit[0]; // first part of the number, the integers
+
+    // string.length will return how many characters are in the string
+    if (int.length > 3) {
+      // substr() returns part of the string
+      // substr(); 2 args; 1. position we want to start at. 2. how many elements we want ie we read 1 element
+      // this will return only the 1st number
+      int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3); // 2310 -> 2,310
+    }
+    dec = numSplit[1]; // the 2nd part of the number, the decimals
+
+    return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+  };
+
   // it needs to be public function because it needs to be accessible by the other controller
   return {
     getInput: function() {
@@ -220,7 +249,7 @@ var UIController = (function() {
       // replace() searches for a string and then replaces that string with the data that we put into the method
       newHtml = html.replace('%id%', obj.id)
       newHtml = newHtml.replace('%description%', obj.description);
-      newHtml = newHtml.replace('%value%', obj.value);
+      newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
       // insert the HTML into the DOM
       /*
@@ -262,9 +291,11 @@ var UIController = (function() {
 
     displayBudget: function(obj) {
 
+      obj.budget > 0 ? type = 'inc' : type = 'exp';
+
       // getBudget() has all the calculated totals; we're accessing the objects from that function which was passed in as obj when we called displayBudget in the global app controller
-      document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-      document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
+      document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+      document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc);
       document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
 
       // we only want to display the percentage if it's greater than 0 && not -1
