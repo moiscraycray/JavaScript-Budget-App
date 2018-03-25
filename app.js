@@ -200,6 +200,12 @@ var UIController = (function() {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
+    deleteListItem: function(selectorID) {
+      // in Javascript, we can only delete an element by deleting it as a child, so we have to find the parent element
+      var el = document.getElementById(selectorID);
+      el.parentNode.removeChild(el);
+    },
+
     // clearing input fields after hitting 'enter'
     clearFields: function() {
       var fields, fieldsArr;
@@ -316,6 +322,7 @@ var controller = (function(budgetCtrl, UICtrl) {
 
   // need to pass in event object; the callback function of the addEventListener method always have access to this event object, and we can call it whatever we want
   // we want the event object here because we want to know what the target element is
+  // event is 'click'
   var ctrlDeleteItem = function(event) {
     var itemID, splitID, type, ID;
 
@@ -332,8 +339,10 @@ var controller = (function(budgetCtrl, UICtrl) {
       budgetCtrl.deleteItem(type, ID);
 
       // 2. delete the item from the UI
+      UICtrl.deleteListItem(itemID)
 
       // 3. update and show the new budget
+      updateBudget();
     }
 
   };
