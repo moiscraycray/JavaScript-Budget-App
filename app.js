@@ -241,6 +241,13 @@ var UIController = (function() {
         return (type === 'exp' ? '-' : '+') + ' ' + newInt + '.' + dec;
   };
 
+  // nodeListForEach <- section 6 lec 87
+  var nodeListForEach = function(list, callback) {
+    for (var i = 0; i < list.length; i++) {
+      callback(list[i], i);
+    }
+  };
+
   // it needs to be public function because it needs to be accessible by the other controller
   return {
     getInput: function() {
@@ -331,17 +338,8 @@ var UIController = (function() {
     // passing in array of percentages calculated in the budget controller
     displayPercentages: function(percentages) {
 
-      var fields, nodeListForEach;
-
       // this returns a nodeList because each element is called a node
-      fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
-
-      // nodeListForEach <- section 6 lec 87
-      nodeListForEach = function(list, callback) {
-        for (var i = 0; i < list.length; i++) {
-          callback(list[i], i);
-        }
-      };
+      var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
       nodeListForEach(fields, function(current, index) {
 
@@ -362,6 +360,21 @@ var UIController = (function() {
       month = now.getMonth();
       year = now.getFullYear();
       document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
+    },
+
+    // changes the outline color of the input fields
+    changedType: function() {
+      var fields = document.querySelectorAll(
+        DOMstrings.inputType + ',' +
+        DOMstrings.inputDescription + ',' +
+        DOMstrings.inputValue
+      );
+
+      nodeListForEach(fields, function(currentValue) {
+        currentValue.classList.toggle('red-focus');
+      });
+
+      document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
     },
 
     // returning DOMstrings here so other functions can access the classnames
@@ -398,6 +411,8 @@ var controller = (function(budgetCtrl, UICtrl) {
     });
 
     document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
+    document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
   }
 
   var updateBudget = function() {
