@@ -11,7 +11,24 @@ var budgetController = (function() {
     this.id = id;
     this.description = description;
     this.value = value;
+    this.percentage = -1; // when something is undefined, we set it to -1. percentage will be calculated later by other functions so it's undefined when the instance is created
   };
+
+  // this calculates the percentage of the expense item
+  Expense.prototype.calcPercentage = function(totalIncome) {
+
+    if (totalIncome > 0) {
+      this.percentage = Math.round(this.value / totalIncome * 100);
+    } else {
+      this.percentage = -1;
+    }
+
+  };
+
+  // this returns the above function
+  Expense.prototype.getPercentage = function() {
+    return this.percentage;
+  }
 
   var Income = function(id, description, value) {
     this.id = id;
@@ -81,6 +98,25 @@ var budgetController = (function() {
 
     },
 
+    deleteItem: function(type, id) {
+      var ids, index;
+      // type is income/expense
+      // map() can also have a (callback) function that takes currentValue, index, array
+      // var new_array = arr.map(function callback(currentValue[, index[, array]])
+      ids = data.allItems[type].map(function(currentValue) {
+        return currentValue.id;
+      });
+
+      // The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+      index = ids.indexOf(id);
+
+      if (index !== -1) {
+        // splice() method changes the contents of an array by removing existing elements and/or adding new elements.
+        // array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+        data.allItems[type].splice(index, 1); // index is the element we want to delete. 1 is the number of elements we want to delete
+      }
+    },
+
     calculateBudget: function() {
 
       // calculate total income and expenses
@@ -97,6 +133,21 @@ var budgetController = (function() {
         data.percentage = -1;
       } // we only want to calculate the percentage if income > 0 because we cannot divide something by 0
 
+    },
+
+    calculatePercentages: function() {
+
+      data.allItems.exp.forEach(function(currentValue) {
+        currentValue.calcPercentage(data.totals.inc);
+      });
+
+    },
+
+    getPercentages: function() {
+      var allPerc = data.allItems.exp.map(function(currentValue) {
+        return currentValue.getPercentage()
+      });
+      return allPerc;
     },
 
     getBudget: function() {
@@ -134,7 +185,9 @@ var UIController = (function() {
     budgetLabel: '.budget__value',
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
-    percentageLabel: '.budget__expenses--percentage'
+    percentageLabel: '.budget__expenses--percentage',
+    container: '.container',
+    expensesPercLabel: '.item__percentage'
   };
 
   // it needs to be public function because it needs to be accessible by the other controller
@@ -156,10 +209,10 @@ var UIController = (function() {
       // we put in some % signs so it's easier to find later
       if (type === 'inc') {
         element = DOMstrings.incomeContainer;
-        html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+        html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
       } else if (type === 'exp') {
         element = DOMstrings.expensesContainer;
-        html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
+        html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
       };
 
 
@@ -178,6 +231,12 @@ var UIController = (function() {
       'afterend': After the element itself
       */
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+    },
+
+    deleteListItem: function(selectorID) {
+      // in Javascript, we can only delete an element by deleting it as a child, so we have to find the parent element
+      var el = document.getElementById(selectorID);
+      el.parentNode.removeChild(el);
     },
 
     // clearing input fields after hitting 'enter'
@@ -216,6 +275,33 @@ var UIController = (function() {
       }
     },
 
+    // passing in array of percentages calculated in the budget controller
+    displayPercentages: function(percentages) {
+
+      var fields, nodeListForEach;
+
+      // this returns a nodeList because each element is called a node
+      fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
+
+      // nodeListForEach <- section 6 lec 87
+      nodeListForEach = function(list, callback) {
+        for (var i = 0; i < list.length; i++) {
+          callback(list[i], i);
+        }
+      };
+
+      nodeListForEach(fields, function(current, index) {
+
+        if (percentages[index] > 0) {
+          current.textContent = percentages[index] + '%';
+        } else {
+          current.textContent = '---';
+        }
+
+      });
+
+    },
+
     // returning DOMstrings here so other functions can access the classnames
     getDOMstrings: function() {
       return DOMstrings;
@@ -248,6 +334,8 @@ var controller = (function(budgetCtrl, UICtrl) {
         ctrlAddItem();
       }
     });
+
+    document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
   }
 
   var updateBudget = function() {
@@ -260,6 +348,19 @@ var controller = (function(budgetCtrl, UICtrl) {
 
     // 3. display the budget on the UI
     UICtrl.displayBudget(budget);
+  };
+
+  var updatePercentages = function() {
+
+    // 1. Calculate the percentages
+    budgetCtrl.calculatePercentages();
+
+    // 2. read the percentages from the budget controller
+    var percentages = budgetCtrl.getPercentages();
+
+    // 3. update the UI with the new percentages
+    UICtrl.displayPercentages(percentages);
+
   };
 
 
@@ -288,9 +389,43 @@ var controller = (function(budgetCtrl, UICtrl) {
       // 5. Calculate and update budget
       updateBudget();
 
+      // 6. calculate and update percentages
+      updatePercentages();
+
     }
 
   };
+
+  // need to pass in event object; the callback function of the addEventListener method always have access to this event object, and we can call it whatever we want
+  // we want the event object here because we want to know what the target element is
+  // event is 'click'
+  var ctrlDeleteItem = function(event) {
+    var itemID, splitID, type, ID;
+
+    // the .id is the id from the html
+    itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+    if (itemID) { // coerced to true/false if this exists
+      // e.g. inc-0
+      splitID = itemID.split('-'); // output: ['inc','0'];
+      type = splitID[0]; // output: 'inc'
+      ID = parseInt(splitID[1]); // output: 0
+
+      // 1. delete item from data structure
+      budgetCtrl.deleteItem(type, ID);
+
+      // 2. delete the item from the UI
+      UICtrl.deleteListItem(itemID)
+
+      // 3. update and show the new budget
+      updateBudget();
+
+      // 4. calculate and update percentages
+      updatePercentages();
+    }
+
+  };
+
 
   // need to return it so it's a public function/can access it from the outside
   return {
