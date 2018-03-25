@@ -187,7 +187,8 @@ var UIController = (function() {
     expensesLabel: '.budget__expenses--value',
     percentageLabel: '.budget__expenses--percentage',
     container: '.container',
-    expensesPercLabel: '.item__percentage'
+    expensesPercLabel: '.item__percentage',
+    dateLabel: '.budget__title--month'
   };
 
   var formatNumber = function(num, type) {
@@ -201,22 +202,43 @@ var UIController = (function() {
     */
 
     // .abs() simply removes the sign off the number
-    num = Math.abs(num);
-    num = num.toFixed(2); // puts exactly 2 decimal numbers; this is now a string
+    // num = Math.abs(num);
+    // num = num.toFixed(2); // puts exactly 2 decimal numbers; this is now a string
+    //
+    // numSplit = num.split('.');
+    // int = numSplit[0]; // first part of the number, the integers
+    //
+    // // string.length will return how many characters are in the string
+    // if (int.length > 3) {
+    //   // substr() returns part of the string
+    //   // substr(); 2 args; 1. position we want to start at. 2. how many elements we want ie we read 1 element
+    //   // this will return only the 1st number
+    //   int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3); // 2310 -> 2,310
+    // }
+    // dec = numSplit[1]; // the 2nd part of the number, the decimals
+    //
+    // return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
 
-    numSplit = num.split('.');
-    int = numSplit[0]; // first part of the number, the integers
 
-    // string.length will return how many characters are in the string
-    if (int.length > 3) {
-      // substr() returns part of the string
-      // substr(); 2 args; 1. position we want to start at. 2. how many elements we want ie we read 1 element
-      // this will return only the 1st number
-      int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3); // 2310 -> 2,310
-    }
-    dec = numSplit[1]; // the 2nd part of the number, the decimals
 
-    return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+    var numSplit, int, dec, type, leading, times, newInt;
+        num = Math.abs(num);
+        num = num.toFixed(2);
+        numSplit = num.split('.');
+        int = numSplit[0];
+        if (int.length > 3) {
+            leading = int.length % 3; // # of digits before first thousands separator
+            times = Math.floor(int.length / 3) - 1; // # of thousands separators
+            leading > 0 ? newInt = int.substr(0, leading) + ',' : newInt = '';
+            for (i = 0; i < times; i++) {
+                newInt += int.substr(leading + 3 * i, 3) + ',';
+            }
+            newInt += int.substr(leading + times * 3, 3);
+        } else {
+            newInt = int;
+        }
+        dec = numSplit[1];
+        return (type === 'exp' ? '-' : '+') + ' ' + newInt + '.' + dec;
   };
 
   // it needs to be public function because it needs to be accessible by the other controller
@@ -295,8 +317,8 @@ var UIController = (function() {
 
       // getBudget() has all the calculated totals; we're accessing the objects from that function which was passed in as obj when we called displayBudget in the global app controller
       document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
-      document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc);
-      document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+      document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+      document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
 
       // we only want to display the percentage if it's greater than 0 && not -1
       if (obj.percentage > 0) {
@@ -331,6 +353,15 @@ var UIController = (function() {
 
       });
 
+    },
+
+    displayMonth: function() {
+      var now, month, months, year;
+      now = new Date();
+      months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      month = now.getMonth();
+      year = now.getFullYear();
+      document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
     },
 
     // returning DOMstrings here so other functions can access the classnames
@@ -462,6 +493,7 @@ var controller = (function(budgetCtrl, UICtrl) {
   return {
     init: function() {
       console.log('app started.');
+      UICtrl.displayMonth();
       UICtrl.displayBudget({
         budget: 0,
         totalInc: 0,
