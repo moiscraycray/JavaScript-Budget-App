@@ -186,7 +186,8 @@ var UIController = (function() {
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
     percentageLabel: '.budget__expenses--percentage',
-    container: '.container'
+    container: '.container',
+    expensesPercLabel: '.item__percentage'
   };
 
   // it needs to be public function because it needs to be accessible by the other controller
@@ -274,6 +275,33 @@ var UIController = (function() {
       }
     },
 
+    // passing in array of percentages calculated in the budget controller
+    displayPercentages: function(percentages) {
+
+      var fields, nodeListForEach;
+
+      // this returns a nodeList because each element is called a node
+      fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
+
+      // nodeListForEach <- section 6 lec 87
+      nodeListForEach = function(list, callback) {
+        for (var i = 0; i < list.length; i++) {
+          callback(list[i], i);
+        }
+      };
+
+      nodeListForEach(fields, function(current, index) {
+
+        if (percentages[index] > 0) {
+          current.textContent = percentages[index] + '%';
+        } else {
+          current.textContent = '---';
+        }
+
+      });
+
+    },
+
     // returning DOMstrings here so other functions can access the classnames
     getDOMstrings: function() {
       return DOMstrings;
@@ -331,7 +359,7 @@ var controller = (function(budgetCtrl, UICtrl) {
     var percentages = budgetCtrl.getPercentages();
 
     // 3. update the UI with the new percentages
-    console.log(percentages);
+    UICtrl.displayPercentages(percentages);
 
   };
 
