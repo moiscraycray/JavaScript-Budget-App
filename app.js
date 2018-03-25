@@ -11,7 +11,24 @@ var budgetController = (function() {
     this.id = id;
     this.description = description;
     this.value = value;
+    this.percentage = -1; // when something is undefined, we set it to -1. percentage will be calculated later by other functions so it's undefined when the instance is created
   };
+
+  // this calculates the percentage of the expense item
+  Expense.prototype.calcPercentage = function(totalIncome) {
+
+    if (totalIncome > 0) {
+      this.percentage = Math.round(this.value / totalIncome * 100);
+    } else {
+      this.percentage = -1;
+    }
+
+  };
+
+  // this returns the above function
+  Expense.prototype.getPercentage = function() {
+    return this.percentage;
+  }
 
   var Income = function(id, description, value) {
     this.id = id;
@@ -116,6 +133,21 @@ var budgetController = (function() {
         data.percentage = -1;
       } // we only want to calculate the percentage if income > 0 because we cannot divide something by 0
 
+    },
+
+    calculatePercentages: function() {
+
+      data.allItems.exp.forEach(function(currentValue) {
+        currentValue.calcPercentage(data.totals.inc);
+      });
+
+    },
+
+    getPercentages: function() {
+      var allPerc = data.allItems.exp.map(function(currentValue) {
+        return currentValue.getPercentage()
+      });
+      return allPerc;
     },
 
     getBudget: function() {
@@ -293,10 +325,13 @@ var controller = (function(budgetCtrl, UICtrl) {
   var updatePercentages = function() {
 
     // 1. Calculate the percentages
+    budgetCtrl.calculatePercentages();
 
     // 2. read the percentages from the budget controller
+    var percentages = budgetCtrl.getPercentages();
 
     // 3. update the UI with the new percentages
+    console.log(percentages);
 
   };
 
